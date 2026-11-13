@@ -68,7 +68,7 @@ src/
 │   ├── transcription.ts     # DashScope WebSocket real-time speech-to-text (截图模式 text or 对话模式 sentences)
 │   ├── window-resize.ts     # Cursor-tracking resize for the frameless windows
 │   ├── tray.ts              # Tray icon (menu bar / notification area): click = 框选识别, right-click menu (`hideTrayIcon`)
-│   ├── auto-updater.ts      # New releases, announced in the window: Windows installs via electron-updater, macOS links to the page
+│   ├── auto-updater.ts      # 已关闭应用内更新，保留兼容 IPC
 │   └── index.d.ts           # global.mainWindow type declaration
 ├── preload/
 │   ├── index.ts             # contextBridge API: exposes window.api to renderer
@@ -78,7 +78,7 @@ src/
 │   ├── capture-region.ts    # CaptureRegion type + fractions → pixels, for main's crop and the picker's readout
 │   ├── api-profile.ts       # ApiProfile + AppMode types
 │   ├── knowledge.ts         # KnowledgeDoc type, the suggested per-mode limit, estimateTokens()
-│   ├── update.ts            # AvailableUpdate: a newer release main found, and how far its download got
+│   ├── update.ts            # 更新接口的兼容类型
 │   ├── conversation.ts      # 对话模式 types (Utterance, HintCard, HintMode) + countMeaningfulChars()
 │   ├── proxy.ts             # 网络代理: ProxySettings + normalizeProxySettings() (validated on both sides of IPC), modelsURL()
 │   ├── external-knowledge.ts # 外部知识库: settings + normalizer, retrievalURL(), the passages' prompt block
@@ -129,7 +129,7 @@ src/
         │   ├── Shortcuts.tsx
         │   ├── OverlayToolbar.tsx  # Toolbar section (buttons + meanings + shortcuts)
         │   ├── FAQ.tsx
-        │   ├── UpdateNotice.tsx    # 发现新版本 card in 简介: download / install on Windows, release page on macOS
+        │   ├── UpdateNotice.tsx    # 上游更新卡片，本地页面已移除引用
         │   └── components/index.tsx  # HelpSection wrapper
         ├── components/
         │   ├── MarkdownRenderer.tsx   # react-markdown + remark-gfm + rehype-highlight + KaTeX math
@@ -478,14 +478,13 @@ What the mode pages show, mirrored read-only to a phone's browser (`src/main/mob
 - Settings changes are applied 600ms after typing stops (`reconcile()`); a failed LAN start (port taken) is retried with the next change. The relay client reconnects with backoff (1s → 30s) and drops a connection silent for 60s; a 401 is not retried
 - `relay/` has its own `package.json` and `node_modules` and is excluded from the packaged app (`electron-builder.yml`); main bundles `ws` from the root dependencies
 
-### Update Notice
+### 本地更新约定
 
-`src/main/auto-updater.ts` checks at startup and every 6 hours, and reports a newer release with `update-status`. It is never a native dialog or a system notification: those are drawn outside content protection, so one popping up mid-interview would show on the shared screen
-
-- Shown inside the main window only: a 「有新版本」 badge after the version in `AppHeader`, leading to the help page, where `UpdateNotice` holds the details and the button
-- Windows: electron-updater with `autoDownload = false`. The user starts the download and the restart; a finished download also installs on quit (`autoInstallOnAppQuit`)
-- macOS: no Apple signature (see macOS Signing), and Squirrel.Mac was never tried with it. Main requests github.com/…/releases/latest/download/latest.yml with `net.request` (system proxy) and reads the tag from where it redirects (`…/releases/download/<tag>/…`, whether the release has the file or not), following the extra hop a renamed repository adds, and the card links to the release page. It then downloads the file without reading it, so `latest.yml`'s download count counts the checks of both platforms; v3.4.0 and earlier read `releases/latest` instead and are not counted. v3.3.0 stops at the rename's hop, so its macOS users get no notice once the repository is renamed. Not the REST API: its 60 unauthenticated requests an hour per IP run out on a shared proxy exit
-- Both follow Latest only, never a pre-release: a release reaches users once it is promoted to Latest. A failed check stays silent
+- 本地开发基于 `v3.6.2`，分支为 `codex/disable-updates`。
+- `origin` 指向 `OIiveirra/shiping`。`upstream` 指向 `ooboqoo/shiping`。
+- 应用内更新已关闭。`auto-updater.ts` 只注册兼容 IPC，三个接口均返回 null。
+- 标题栏更新提示和帮助页更新卡片已移除。打包配置为 `publish: null`。
+- 获取上游源码时手动执行 Git 操作。
 
 ### Legacy Name
 
@@ -592,7 +591,7 @@ These are read by dotenv in the main process and merged with renderer-side setti
 
 8. **Window movement**: The window can be moved via keyboard shortcuts in 200px steps (up/down/left/right), and resized by dragging its edges (see Window Resizing).
 
-9. **macOS has no auto-update**: `publish: null` in electron-builder.yml for the mac target, since the build has no Apple signature (see macOS Signing). It only gets the in-window notice linking to the release page (see Update Notice).
+9. **应用内更新已关闭**。Windows 和 macOS 共用禁用实现，打包配置为 `publish: null`。
 
 10. **macOS and Windows only**: Linux is not a supported or built target.
 

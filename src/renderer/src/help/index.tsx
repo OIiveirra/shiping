@@ -18,7 +18,6 @@ import { HelpSection } from './components'
 import { Shortcuts } from './Shortcuts'
 import { OverlayToolbarHelp } from './OverlayToolbar'
 import { FAQ } from './FAQ'
-import { UpdateNotice } from './UpdateNotice'
 
 export default function HelpPage() {
   const [appVersion, setAppVersion] = useState('')
@@ -46,7 +45,6 @@ export default function HelpPage() {
       <div id="app-content" className="flex flex-col gap-4 p-8">
         {/* Introduction */}
         <HelpSection Icon={Info} title="简介" description={appVersion && `当前版本 v${appVersion}`}>
-          <UpdateNotice />
           <p className="text-gray-700">
             欢迎使用识屏（原「截屏解题助手」）！屏幕上的题目、代码、报错、图表、外文资料，
             按下快捷键截图，AI 就会理解屏幕内容并给出解答。 您可以访问本项目{' '}

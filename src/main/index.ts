@@ -96,7 +96,7 @@ app.whenReady().then(() => {
 
   createWindow()
 
-  // Configure auto-updater
+  // Register the disabled update API
   initAutoUpdater()
 
   // Clicking the Dock icon brings back a window hidden with the shortcut

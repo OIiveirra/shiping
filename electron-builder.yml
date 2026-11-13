@@ -24,7 +24,7 @@ nsis:
 mac:
   artifactName: ${name}-${version}-${arch}-mac.${ext}
   identity: null # 关掉 electron-builder 自带的签名，改由 afterPack 签
-  publish: null # macOS 版没有 Apple 签名，不做自动更新；应用内只提示新版本并链接到发布页
+  publish: null
   # 系统弹权限框时显示的用途说明。要写成映射：写成列表会原样进 Info.plist，成了系统读不到的 "0"…"3" 键。
   # 没写的沿用 Electron 自带的英文说明（摄像头等，用不到，不会弹框）
   extendInfo:
@@ -37,9 +37,6 @@ dmg:
   # macOS 只构建 CI runner 所在架构（arm64），文件名带上架构避免误下载
   artifactName: ${name}-${version}-${arch}.${ext}
 npmRebuild: false
-publish:
-  provider: github
-  owner: ooboqoo
-  repo: shiping
+publish: null
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/
